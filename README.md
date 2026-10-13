@@ -4,38 +4,38 @@
 
 CareLoop is a lightweight, customer-first Customer Relationship Management platform for small businesses, freelancers, agencies, service providers, and online stores. It helps teams remember what they told customers, track commitments, recognize when someone needs attention, coordinate responsibility across administrators, and follow through on promises.
 
-## 🎯 Problem Statement
+## Problem Statement
 
 Traditional CRMs often focus on leads, sales pipelines, and contact information. CareLoop's signature value is making customer follow-through visible, actionable, and accountable. Businesses lose trust when promises are forgotten, conversations are lost, and nobody knows who is responsible for the next step.
 
-## ✨ Core Features
+## Core Features
 
 ### P0 - Must Work
-- ✅ **Authentication & Role-Based Access**: Manager, Staff Admin, and Customer roles with protected routes
-- ✅ **Role-Based Dashboards**: Separate experiences for administrators and customers
-- ✅ **Customer Management**: Complete customer directory with search, filters, and detail views
-- ✅ **Promise Keeper**: Track specific commitments made to customers with due dates and status
-- ✅ **Customer Memory Card**: Chronological timeline of all customer interactions
-- ✅ **Quiet Customer Alerts**: Evidence-based attention system (overdue promises, due today, no recent interaction)
-- ✅ **Time-Bound Assignments**: Manage team responsibility over defined periods
-- ✅ **Safe Record Updates**: Version-based conflict prevention for concurrent edits
-- ✅ **Responsive UI**: Clean, modern interface that works on desktop, tablet, and mobile
+- **Authentication & Role-Based Access**: Manager, Staff Admin, and Customer roles with protected routes
+- **Role-Based Dashboards**: Separate experiences for administrators and customers
+- **Customer Management**: Complete customer directory with search, filters, and detail views
+- **Promise Keeper**: Track specific commitments made to customers with due dates and status
+- **Customer Memory Card**: Chronological timeline of all customer interactions
+- **Quiet Customer Alerts**: Evidence-based attention system (overdue promises, due today, no recent interaction)
+- **Time-Bound Assignments**: Manage team responsibility over defined periods
+- **Safe Record Updates**: Version-based conflict prevention for concurrent edits
+- **Responsive UI**: Clean, modern interface that works on desktop, tablet, and mobile
 
 ### P1 - High Value
-- ✅ **AI Reply Assistant**: Template-based draft generation for customer responses (with clear labeling)
-- ✅ **WooCommerce Integration**: Connect WooCommerce stores, sync customers and orders
-- ✅ **Customer Portal**: Simplified customer-facing experience with profile, requests, and updates
-- ✅ **Order Management**: View synchronized WooCommerce orders with status tracking
-- ✅ **Audit History**: Activity logging for important changes
-- 🚧 **Assignment Handover**: Transfer ownership with handover notes (data model ready)
+- **AI Reply Assistant**: Template-based draft generation for customer responses (with clear labeling)
+- **WooCommerce Integration**: Connect WooCommerce stores, sync customers and orders
+- **Customer Portal**: Simplified customer-facing experience with profile, requests, and updates
+- **Order Management**: View synchronized WooCommerce orders with status tracking
+- **Audit History**: Activity logging for important changes
+- **Assignment Handover**: Transfer ownership with handover notes (data model ready)
 
 ### P2 - Optional
-- 🚧 **Advanced Agent Tools**: Enhanced AI workflows
-- 🚧 **Charts & Analytics**: Visual reporting dashboards
-- 🚧 **Notifications**: Real-time alerts and updates
-- 🚧 **Additional Integrations**: Shopify, email, SMS (adapter interfaces ready)
+- **Advanced Agent Tools**: Enhanced AI workflows
+- **Charts & Analytics**: Visual reporting dashboards
+- **Notifications**: Real-time alerts and updates
+- **Additional Integrations**: Shopify, email, SMS (adapter interfaces ready)
 
-## 🏗️ Architecture
+## Architecture
 
 ### Technology Stack
 
@@ -96,7 +96,7 @@ CareLoop/
 └── README.md
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -156,53 +156,7 @@ The seed script creates three demo accounts:
 
 **Note**: To create a manager account during signup, use the invitation code `DEMO_MANAGER`.
 
-## � WooCommerce Integration
-
-CareLoop includes a WooCommerce integration to synchronize customers and orders from your online store.
-
-### Setting Up WooCommerce API Keys
-
-1. Log in to your WooCommerce admin panel
-2. Go to **WooCommerce → Settings → Advanced → REST API**
-3. Click **Add Key**
-4. Enter a description (e.g., "CareLoop CRM")
-5. Select **Read** permissions (minimum required: Customers: Read, Orders: Read)
-6. Click **Generate API Key**
-7. Copy the Consumer Key and Consumer Secret
-
-### Connecting Your Store
-
-1. Navigate to **Integrations** in CareLoop
-2. Click **Connect Store** under WooCommerce
-3. Enter your store URL (e.g., `https://yourstore.com`)
-4. Enter the Consumer Key and Consumer Secret
-5. Choose what to import (Customers, Orders)
-6. Click **Test Connection** to verify credentials
-7. Click **Connect Store** to complete the setup
-
-### Features
-
-- **Customer Synchronization**: Import WooCommerce customers with contact information
-- **Order Synchronization**: Import order history with status tracking
-- **Customer Profile Integration**: View WooCommerce orders in customer profiles
-- **AI Reply Assistant**: Generate context-aware drafts based on order information
-- **Order-based Promises**: Create follow-up commitments directly from orders
-
-### Security
-
-- Credentials are stored securely on the server (never exposed to the browser)
-- Store URLs are validated to prevent SSRF attacks
-- All integration operations require Manager role
-- Webhook signature verification implemented (HMAC-SHA256)
-
-### Known Limitations
-
-- Initial sync is manual (trigger via "Sync Now" button)
-- Background scheduled sync not yet implemented
-- Product synchronization not yet implemented
-- Requires real WooCommerce store credentials for full functionality
-
-## �📡 API Overview
+## API Overview
 
 ### Authentication
 - `POST /api/auth/signup` - Register new user
@@ -244,7 +198,7 @@ CareLoop includes a WooCommerce integration to synchronize customers and orders 
 - `POST /api/integrations/woocommerce/sync` - Trigger synchronization (Manager only)
 - `POST /api/integrations/woocommerce/:id/disconnect` - Disconnect store (Manager only)
 
-## 🔐 Security & Authorization
+## Security & Authorization
 
 ### Role-Based Access Control
 
@@ -278,7 +232,7 @@ CareLoop includes a WooCommerce integration to synchronize customers and orders 
 - No API keys in frontend bundles
 - CORS configuration
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 
@@ -295,9 +249,9 @@ npm test
 ### Test Coverage
 
 Current implementation includes:
-- ✅ Unit tests for business logic (planned)
-- ✅ API endpoint tests (planned)
-- ✅ E2E tests for critical workflows (planned)
+- Unit tests for business logic (planned)
+- API endpoint tests (planned)
+- E2E tests for critical workflows (planned)
 
 ## 📝 Known Limitations
 
@@ -310,7 +264,7 @@ Current implementation includes:
 7. **Support Request UI**: Backend API exists, frontend UI not yet implemented.
 8. **Assignment Management UI**: Backend data model and logic ready, frontend UI not yet implemented.
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -318,36 +272,11 @@ Current implementation includes:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is created for hackathon demonstration purposes.
 
-## 🎬 Two-Minute Demo Script
-
-**0:00–0:15 — The Problem**
-"Businesses don't just lose customers because of bad products. They lose trust when promises are forgotten, conversations are lost, and nobody knows who is responsible."
-
-**0:15–0:35 — Dashboard**
-Show the actual metrics and the Needs Attention panel. Open an overdue commitment and explain the evidence behind its alert.
-
-**0:35–0:55 — Customer Memory Card**
-Open a customer and show their interaction history, outstanding commitment, responsible administrator, and next step.
-
-**0:55–1:15 — Promise Keeper**
-Create or open a promise, show its due date, and fulfill it. Point out the recorded completion and activity event.
-
-**1:15–1:35 — AI Assistant**
-Generate an editable, context-aware reply draft. Explain that it uses the known customer context and requires human approval before sending.
-
-**1:35–1:50 — Assignments and Collaboration**
-Show a time-bound assignment, handover information, and the conflict-protection behavior. Explain that expired ownership does not erase outstanding work.
-
-**1:50–2:00 — Customer Value**
-Switch to the customer portal and show the customer's own request or approved update.
-
-**Close**: "CareLoop doesn't just manage customer records. It helps teams remember what they promised, know who owns the next step, and follow through."
-
-## 📞 Support
+## Support
 
 For support, please open an issue in the repository or contact the development team.
 
