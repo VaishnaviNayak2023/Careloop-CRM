@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../lib/api';
 import { Customer, Promise, Interaction } from '../types';
-import { Mail, Phone, Building, Calendar, Clock, CheckSquare, Plus, MessageSquare } from 'lucide-react';
+import { Mail, Phone, Building, Calendar, Clock, CheckSquare, Plus, MessageSquare, ShoppingCart, Store } from 'lucide-react';
 
 export default function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [customer, setCustomer] = useState<Customer | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (id) {
       fetchCustomer(id);
+      fetchOrders(id);
     }
   }, [id]);
 
@@ -23,6 +25,15 @@ export default function CustomerDetailPage() {
       console.error('Failed to fetch customer:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOrders = async (customerId: string) => {
+    try {
+      const response = await api.get(`/orders/customer/${customerId}`);
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
     }
   };
 
@@ -141,27 +152,36 @@ export default function CustomerDetailPage() {
           </button>
         </div>
 
-        {/* Support Requests */}
+        {/* WooCommerce Orders */}
         <div className="card p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-navy-600" />
-            Support Requests
+            <ShoppingCart className="w-5 h-5 text-navy-600" />
+            Orders
           </h2>
           <div className="space-y-3">
-            {customer.supportRequests?.slice(0, 3).map((request) => (
-              <div key={request.id} className="p-3 bg-gray-50 rounded-lg">
-                <p className="font-medium text-gray-900 text-sm">{request.subject}</p>
-                <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded-full ${
-                  request.status === 'OPEN' ? 'bg-blue-100 text-blue-700' :
-                  request.status === 'RESOLVED' ? 'bg-green-100 text-green-700' :
-                  'bg-gray-100 text-gray-700'
-                }`}>
-                  {request.status}
-                </span>
+            {orders.length > 0 ? (
+              orders.slice(0, 3).map((order) => (
+                <div key={order.id} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-gray-900 text-sm">#{order.externalOrderNumber}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      order.orderStatus === 'completed' ? 'bg-green-100 text-green-700' :
+                      order.orderStatus === 'processing' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {order.orderStatus}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{order.currency} {order.total.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <Store className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm text-gray-500">No orders</p>
+                <p className="text-xs text-gray-400 mt-1">Connect WooCommerce to see orders</p>
               </div>
-            ))}
-            {(!customer.supportRequests || customer.supportRequests.length === 0) && (
-              <p className="text-sm text-gray-500">No support requests</p>
             )}
           </div>
         </div>

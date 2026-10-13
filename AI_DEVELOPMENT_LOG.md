@@ -2,6 +2,61 @@
 
 This document records meaningful AI-assisted development work for the CareLoop CRM project.
 
+## WooCommerce Integration Implementation
+
+### Extension of Prisma Schema
+- **Decision**: Extended existing schema with WooCommerce integration models
+- **Models Added**: Integration, ExternalCustomerMapping, ExternalOrderMapping, Order, SyncJob, WebhookReceipt
+- **Design**: Used external IDs for deduplication, added foreign key relationships to existing Customer and Promise models
+- **AI Usage**: Analyzed existing schema to maintain consistency and add models without breaking changes
+
+### WooCommerce API Client
+- **Implementation**: Created reusable API client with axios
+- **Features**: Authenticated requests, connection validation, pagination support, timeout handling
+- **Security**: HMAC-SHA256 webhook signature verification implemented
+- **AI Usage**: Structured client to be reusable and testable with proper error handling
+
+### Data Mapping
+- **Implementation**: Created mapper to transform WooCommerce data to CRM format
+- **Features**: Customer mapping, order mapping, payment status determination, guest checkout support
+- **AI Usage**: Deterministic mapping rules without AI inference, clear separation of source data
+
+### Integration Service
+- **Implementation**: Service layer for connection management and synchronization
+- **Features**: Store connection, credential hashing (demo), sync triggers, disconnect
+- **Security**: URL validation, credential protection, manager-only access
+- **AI Usage**: Service layer designed to be extensible for real synchronization logic
+
+### Order Management
+- **Implementation**: New Order model and service for managing synchronized orders
+- **Features**: Order listing, customer orders, promise creation from orders
+- **Integration**: Linked to Promise model for order-based follow-ups
+- **AI Usage**: Extended existing promise system to support order context
+
+### Frontend Integration Pages
+- **Pages Created**: Integrations overview, WooCommerce connection wizard, Orders page
+- **Features**: Connection flow with validation, import settings, order table with status
+- **UI**: Consistent with existing CareLoop design system
+- **AI Usage**: Used existing UI patterns and components for consistency
+
+### Customer Profile Extension
+- **Implementation**: Added WooCommerce section to customer detail page
+- **Features**: Order history display, order status, total value
+- **Integration**: Links to Orders page for detailed view
+- **AI Usage**: Extended existing customer page without breaking changes
+
+### AI Assistant Enhancement
+- **Extension**: Added order context to AI reply drafts
+- **Features**: Order-specific templates, order status information
+- **Templates**: Professional, friendly, apologetic, concise tones for order updates
+- **AI Usage**: Template-based system with clear labeling, no real AI model used
+
+### Customer Portal
+- **Implementation**: Created customer-facing pages (Home, Requests, Profile)
+- **Features**: My Home dashboard, support requests, profile management
+- **Routing**: Automatic redirect for customer role to portal routes
+- **AI Usage**: Simplified interface for customers, internal information hidden
+
 ## Planning and Requirement Decomposition
 
 ### Initial Architecture Decisions
@@ -151,11 +206,13 @@ This document records meaningful AI-assisted development work for the CareLoop C
 
 ## Remaining Limitations
 
-1. **WooCommerce Integration**: Only adapter interface and mock data implemented (no credentials)
+1. **WooCommerce**: Full synchronization logic implemented but requires real store credentials for testing. Webhook signature verification code ready but not deployed.
 2. **Real AI**: Template-based system in use (no AI API key configured)
 3. **Email/SMS**: Not implemented (no email/SMS service credentials)
 4. **Real-time Updates**: No WebSocket implementation
 5. **File Uploads**: Not implemented
+6. **Support Request UI**: Backend API exists, frontend UI not yet implemented
+7. **Assignment Management UI**: Backend data model ready, frontend UI not yet implemented
 6. **Advanced Tests**: Unit and E2E tests not yet written (time constraints)
 
 ## Deployment Notes

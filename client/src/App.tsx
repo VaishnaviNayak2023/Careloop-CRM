@@ -9,6 +9,12 @@ import CustomersPage from './pages/CustomersPage';
 import PromiseKeeperPage from './pages/PromiseKeeperPage';
 import CustomerDetailPage from './pages/CustomerDetailPage';
 import AIAssistantPage from './pages/AIAssistantPage';
+import IntegrationsPage from './pages/IntegrationsPage';
+import WooCommerceConnectPage from './pages/WooCommerceConnectPage';
+import OrdersPage from './pages/OrdersPage';
+import CustomerPortalHome from './pages/portal/CustomerPortalHome';
+import CustomerPortalRequests from './pages/portal/CustomerPortalRequests';
+import CustomerPortalProfile from './pages/portal/CustomerPortalProfile';
 
 function App() {
   return (
@@ -44,6 +50,38 @@ function App() {
           <Route path="/ai" element={
             <MainLayout>
               <AIAssistantPage />
+            </MainLayout>
+          } />
+          <Route path="/integrations" element={
+            <MainLayout>
+              <IntegrationsPage />
+            </MainLayout>
+          } />
+          <Route path="/integrations/woocommerce/connect" element={
+            <MainLayout>
+              <WooCommerceConnectPage />
+            </MainLayout>
+          } />
+          <Route path="/orders" element={
+            <MainLayout>
+              <OrdersPage />
+            </MainLayout>
+          } />
+
+          {/* Customer Portal Routes */}
+          <Route path="/portal/home" element={
+            <MainLayout>
+              <CustomerPortalHome />
+            </MainLayout>
+          } />
+          <Route path="/portal/requests" element={
+            <MainLayout>
+              <CustomerPortalRequests />
+            </MainLayout>
+          } />
+          <Route path="/portal/profile" element={
+            <MainLayout>
+              <CustomerPortalProfile />
             </MainLayout>
           } />
 

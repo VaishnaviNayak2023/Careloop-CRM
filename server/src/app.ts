@@ -6,6 +6,8 @@ import customerRoutes from './modules/customers/customer.routes';
 import promiseRoutes from './modules/promises/promise.routes';
 import alertRoutes from './modules/alerts/alert.routes';
 import aiRoutes from './modules/ai/ai.routes';
+import wooCommerceRoutes from './modules/integrations/woocommerce/woocommerce.routes';
+import orderRoutes from './modules/orders/order.routes';
 
 dotenv.config();
 
@@ -33,6 +35,8 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/promises', promiseRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/integrations/woocommerce', wooCommerceRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

@@ -6,6 +6,7 @@ export interface ReplyDraftRequest {
   customerId: string;
   promiseId?: string;
   supportRequestId?: string;
+  orderId?: string;
   tone: 'professional' | 'friendly' | 'apologetic' | 'concise';
 }
 
@@ -15,6 +16,7 @@ export interface ReplyDraftResponse {
     customerName: string;
     relevantPromise?: string;
     relevantRequest?: string;
+    relevantOrder?: string;
     tone: string;
   };
   isAIGenerated: boolean;
@@ -32,6 +34,7 @@ export class AIService {
 
     let relevantPromise: any = null;
     let relevantRequest: any = null;
+    let relevantOrder: any = null;
 
     if (request.promiseId) {
       relevantPromise = await prisma.promise.findUnique({
@@ -46,8 +49,14 @@ export class AIService {
       });
     }
 
+    if (request.orderId) {
+      relevantOrder = await prisma.order.findUnique({
+        where: { id: request.orderId }
+      });
+    }
+
     // Template-based fallback (clearly labeled as not AI-generated)
-    const draft = this.generateTemplateDraft(customer, relevantPromise, relevantRequest, request.tone);
+    const draft = this.generateTemplateDraft(customer, relevantPromise, relevantRequest, relevantOrder, request.tone);
 
     return {
       draft,
@@ -55,6 +64,7 @@ export class AIService {
         customerName: customer.name,
         relevantPromise: relevantPromise?.title,
         relevantRequest: relevantRequest?.subject,
+        relevantOrder: relevantOrder ? `Order #${relevantOrder.externalOrderNumber}` : undefined,
         tone: request.tone
       },
       isAIGenerated: false
@@ -65,6 +75,7 @@ export class AIService {
     customer: any,
     promise: any,
     request: any,
+    order: any,
     tone: string
   ): string {
     const customerName = customer.name;
@@ -116,6 +127,29 @@ export class AIService {
 
         default:
           return `${greeting}\n\nThank you for your request regarding "${request.subject}". We are reviewing it and will respond soon.\n\nBest regards,\nCareLoop Team`;
+      }
+    }
+
+    if (order) {
+      const orderNumber = order.externalOrderNumber;
+      const orderStatus = order.orderStatus;
+      const orderTotal = `${order.currency} ${order.total.toFixed(2)}`;
+
+      switch (tone) {
+        case 'professional':
+          return `${greeting}\n\nI am writing to provide an update regarding your order #${orderNumber}.\n\nYour order is currently ${orderStatus} with a total of ${orderTotal}.\n\nWe are processing your order and will notify you when there are any updates.\n\nBest regards,\nCareLoop Team`;
+
+        case 'friendly':
+          return `${greeting}!\n\nJust wanted to update you on your order #${orderNumber}. It's currently ${orderStatus}.\n\nWe're working on it and will let you know as soon as it ships!\n\nCheers,\nCareLoop Team`;
+
+        case 'apologetic':
+          return `${greeting}\n\nI apologize for any delay with your order #${orderNumber}. We understand you're waiting and we're working to resolve this as quickly as possible.\n\nYour order (${orderTotal}) is currently ${orderStatus}. We will provide an update soon.\n\nThank you for your patience.\n\nSincerely,\nCareLoop Team`;
+
+        case 'concise':
+          return `${greeting}\n\nOrder #${orderNumber}: ${orderStatus}, total ${orderTotal}. Will update when status changes.\n\nBest,\nCareLoop Team`;
+
+        default:
+          return `${greeting}\n\nRegarding your order #${orderNumber}: it is currently ${orderStatus} with a total of ${orderTotal}.\n\nBest regards,\nCareLoop Team`;
       }
     }
 

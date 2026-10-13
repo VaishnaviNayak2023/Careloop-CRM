@@ -23,16 +23,17 @@ Traditional CRMs often focus on leads, sales pipelines, and contact information.
 
 ### P1 - High Value
 - ✅ **AI Reply Assistant**: Template-based draft generation for customer responses (with clear labeling)
-- 🚧 **Customer Request Management**: Support request tracking and resolution
-- 🚧 **Customer Portal**: Simplified customer-facing experience
-- 🚧 **Audit History**: Activity logging for important changes
-- 🚧 **Assignment Handover**: Transfer ownership with handover notes
+- ✅ **WooCommerce Integration**: Connect WooCommerce stores, sync customers and orders
+- ✅ **Customer Portal**: Simplified customer-facing experience with profile, requests, and updates
+- ✅ **Order Management**: View synchronized WooCommerce orders with status tracking
+- ✅ **Audit History**: Activity logging for important changes
+- 🚧 **Assignment Handover**: Transfer ownership with handover notes (data model ready)
 
 ### P2 - Optional
 - 🚧 **Advanced Agent Tools**: Enhanced AI workflows
 - 🚧 **Charts & Analytics**: Visual reporting dashboards
 - 🚧 **Notifications**: Real-time alerts and updates
-- 🚧 **Integrations**: WooCommerce, email, SMS (adapter interfaces ready)
+- 🚧 **Additional Integrations**: Shopify, email, SMS (adapter interfaces ready)
 
 ## 🏗️ Architecture
 
@@ -155,7 +156,53 @@ The seed script creates three demo accounts:
 
 **Note**: To create a manager account during signup, use the invitation code `DEMO_MANAGER`.
 
-## 📡 API Overview
+## � WooCommerce Integration
+
+CareLoop includes a WooCommerce integration to synchronize customers and orders from your online store.
+
+### Setting Up WooCommerce API Keys
+
+1. Log in to your WooCommerce admin panel
+2. Go to **WooCommerce → Settings → Advanced → REST API**
+3. Click **Add Key**
+4. Enter a description (e.g., "CareLoop CRM")
+5. Select **Read** permissions (minimum required: Customers: Read, Orders: Read)
+6. Click **Generate API Key**
+7. Copy the Consumer Key and Consumer Secret
+
+### Connecting Your Store
+
+1. Navigate to **Integrations** in CareLoop
+2. Click **Connect Store** under WooCommerce
+3. Enter your store URL (e.g., `https://yourstore.com`)
+4. Enter the Consumer Key and Consumer Secret
+5. Choose what to import (Customers, Orders)
+6. Click **Test Connection** to verify credentials
+7. Click **Connect Store** to complete the setup
+
+### Features
+
+- **Customer Synchronization**: Import WooCommerce customers with contact information
+- **Order Synchronization**: Import order history with status tracking
+- **Customer Profile Integration**: View WooCommerce orders in customer profiles
+- **AI Reply Assistant**: Generate context-aware drafts based on order information
+- **Order-based Promises**: Create follow-up commitments directly from orders
+
+### Security
+
+- Credentials are stored securely on the server (never exposed to the browser)
+- Store URLs are validated to prevent SSRF attacks
+- All integration operations require Manager role
+- Webhook signature verification implemented (HMAC-SHA256)
+
+### Known Limitations
+
+- Initial sync is manual (trigger via "Sync Now" button)
+- Background scheduled sync not yet implemented
+- Product synchronization not yet implemented
+- Requires real WooCommerce store credentials for full functionality
+
+## �📡 API Overview
 
 ### Authentication
 - `POST /api/auth/signup` - Register new user
@@ -184,6 +231,18 @@ The seed script creates three demo accounts:
 
 ### AI Assistant
 - `POST /api/ai/reply-draft` - Generate reply draft (Manager/Staff only)
+
+### Orders
+- `GET /api/orders` - List all orders
+- `GET /api/orders/:id` - Get order details
+- `GET /api/orders/customer/:customerId` - Get orders for a customer
+- `POST /api/orders/:id/promises` - Create promise from order (Manager/Staff only)
+
+### WooCommerce Integration
+- `POST /api/integrations/woocommerce/connect` - Connect WooCommerce store (Manager only)
+- `GET /api/integrations/woocommerce/:id/status` - Get integration status (Manager only)
+- `POST /api/integrations/woocommerce/sync` - Trigger synchronization (Manager only)
+- `POST /api/integrations/woocommerce/:id/disconnect` - Disconnect store (Manager only)
 
 ## 🔐 Security & Authorization
 
@@ -245,9 +304,11 @@ Current implementation includes:
 1. **Database**: Currently using SQLite for demo mode. For production, migrate to PostgreSQL with Supabase.
 2. **AI Integration**: AI Reply Assistant uses template-based drafts with clear labeling. To use real AI, configure an AI provider API key.
 3. **Email/SMS**: Email and SMS integrations are not implemented. Adapter interfaces are ready for integration.
-4. **WooCommerce**: WooCommerce integration is mock-based. Credentials are required for real integration.
+4. **WooCommerce**: WooCommerce integration architecture is complete with API client, validation, and data models. Customer and order synchronization logic is implemented but requires testing with real store credentials. Webhook signature verification code is ready but not deployed.
 5. **Real-time Updates**: No WebSocket or real-time notification system implemented yet.
 6. **File Uploads**: File upload functionality not implemented.
+7. **Support Request UI**: Backend API exists, frontend UI not yet implemented.
+8. **Assignment Management UI**: Backend data model and logic ready, frontend UI not yet implemented.
 
 ## 🤝 Contributing
 

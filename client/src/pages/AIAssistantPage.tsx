@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import api from '../lib/api';
-import { Sparkles, Mail, MessageSquare, Copy, RefreshCw, Send } from 'lucide-react';
+import { Sparkles, Mail, MessageSquare, Copy, RefreshCw, Send, ShoppingCart } from 'lucide-react';
 
 export default function AIAssistantPage() {
   const [customerId, setCustomerId] = useState('');
   const [promiseId, setPromiseId] = useState('');
   const [supportRequestId, setSupportRequestId] = useState('');
+  const [orderId, setOrderId] = useState('');
   const [tone, setTone] = useState<'professional' | 'friendly' | 'apologetic' | 'concise'>('professional');
   const [draft, setDraft] = useState('');
   const [context, setContext] = useState<any>(null);
@@ -23,6 +24,7 @@ export default function AIAssistantPage() {
         customerId,
         promiseId: promiseId || undefined,
         supportRequestId: supportRequestId || undefined,
+        orderId: orderId || undefined,
         tone
       });
       setDraft(response.data.draft);
@@ -100,6 +102,22 @@ export default function AIAssistantPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Order ID (optional)
+            </label>
+            <div className="relative">
+              <ShoppingCart className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={orderId}
+                onChange={(e) => setOrderId(e.target.value)}
+                className="input-field pl-10"
+                placeholder="Enter order ID"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Tone
             </label>
             <select
@@ -150,6 +168,11 @@ export default function AIAssistantPage() {
               {context.relevantRequest && (
                 <p className="text-sm text-gray-600 mt-1">
                   <strong>Request:</strong> {context.relevantRequest}
+                </p>
+              )}
+              {context.relevantOrder && (
+                <p className="text-sm text-gray-600 mt-1">
+                  <strong>Order:</strong> {context.relevantOrder}
                 </p>
               )}
               <p className="text-sm text-gray-600 mt-1">

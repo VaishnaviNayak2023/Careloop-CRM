@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
@@ -13,7 +13,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  ShoppingCart,
+  Link as LinkIcon
 } from 'lucide-react';
 
 interface NavItem {
@@ -27,9 +29,11 @@ const navItems: NavItem[] = [
   { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['MANAGER', 'STAFF_ADMIN'] },
   { label: 'Customers', icon: Users, path: '/customers', roles: ['MANAGER', 'STAFF_ADMIN'] },
   { label: 'Promise Keeper', icon: CheckSquare, path: '/promises', roles: ['MANAGER', 'STAFF_ADMIN'] },
+  { label: 'Orders', icon: ShoppingCart, path: '/orders', roles: ['MANAGER', 'STAFF_ADMIN'] },
   { label: 'Support Requests', icon: MessageSquare, path: '/support', roles: ['MANAGER', 'STAFF_ADMIN'] },
   { label: 'Assignments', icon: Calendar, path: '/assignments', roles: ['MANAGER', 'STAFF_ADMIN'] },
   { label: 'AI Assistant', icon: Sparkles, path: '/ai', roles: ['MANAGER', 'STAFF_ADMIN'] },
+  { label: 'Integrations', icon: Link, path: '/integrations', roles: ['MANAGER'] },
   { label: 'Activity', icon: History, path: '/activity', roles: ['MANAGER', 'STAFF_ADMIN'] },
   { label: 'Reports', icon: BarChart3, path: '/reports', roles: ['MANAGER', 'STAFF_ADMIN'] },
   { label: 'Settings', icon: Settings, path: '/settings', roles: ['MANAGER', 'STAFF_ADMIN', 'CUSTOMER'] },
@@ -90,7 +94,7 @@ export default function Sidebar() {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
-              <Link
+              <RouterLink
                 key={item.path}
                 to={item.path}
                 className={`
@@ -103,7 +107,7 @@ export default function Sidebar() {
               >
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>
-              </Link>
+              </RouterLink>
             );
           })}
         </nav>

@@ -25,6 +25,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
     return <Navigate to="/login" replace />;
   }
 
+  // Redirect customers to portal
+  if (user.role === 'CUSTOMER') {
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith('/portal')) {
+      return <Navigate to="/portal/home" replace />;
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar />

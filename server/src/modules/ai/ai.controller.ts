@@ -8,6 +8,7 @@ const replyDraftSchema = z.object({
   customerId: z.string().min(1, 'Customer ID is required'),
   promiseId: z.string().optional(),
   supportRequestId: z.string().optional(),
+  orderId: z.string().optional(),
   tone: z.enum(['professional', 'friendly', 'apologetic', 'concise']).default('professional'),
 });
 
