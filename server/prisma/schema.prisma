@@ -12,8 +12,8 @@ model User {
   email           String    @unique
   passwordHash    String
   fullName        String
-  role            UserRole  @default(CUSTOMER)
-  accountStatus   AccountStatus @default(ACTIVE)
+  role            String    @default("CUSTOMER")
+  accountStatus   String    @default("ACTIVE")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -43,9 +43,7 @@ model Customer {
   version         Int       @default(1)
 
   // Relations
-  currentAssignmentId String?
-  currentAssignment   Assignment?  @relation("CurrentAssignment", fields: [currentAssignmentId], references: [id])
-  assignments         Assignment[]
+  assignments         Assignment[]  @relation("CustomerAssignments")
   promises            Promise[]
   interactions        Interaction[]
   supportRequests     SupportRequest[]
@@ -79,19 +77,18 @@ model StaffAdmin {
 model Assignment {
   id              String        @id @default(cuid())
   customerId      String
-  customer        Customer      @relation(fields: [customerId], references: [id])
+  customer        Customer      @relation("CustomerAssignments", fields: [customerId], references: [id])
   adminId         String
   admin           StaffAdmin    @relation("AssignedCustomers", fields: [adminId], references: [id])
   assignedBy      String
   createdBy       StaffAdmin    @relation("CreatedAssignments", fields: [assignedBy], references: [id])
   startAt         DateTime
   endAt           DateTime
-  status          AssignmentStatus @default(SCHEDULED)
+  status          String        @default("SCHEDULED")
   handoverNotes   String?
   createdAt       DateTime      @default(now())
   endedAt         DateTime?
 
-  @@unique([customerId, status])
   @@index([customerId])
   @@index([adminId])
   @@map("assignments")
@@ -106,7 +103,7 @@ model Promise {
   title           String
   description     String
   dueAt           DateTime
-  status          PromiseStatus @default(OPEN)
+  status          String        @default("OPEN")
   priority        String        @default("medium")
   createdBy       String
   creator         StaffAdmin    @relation("CreatedPromises", fields: [createdBy], references: [id])
@@ -149,7 +146,7 @@ model SupportRequest {
   customer        Customer          @relation(fields: [customerId], references: [id])
   subject         String
   description     String
-  status          RequestStatus     @default(OPEN)
+  status          String            @default("OPEN")
   priority        String            @default("medium")
   assignedTo      String?
   assignee        StaffAdmin?       @relation(fields: [assignedTo], references: [id])
@@ -169,6 +166,10 @@ model ActivityEvent {
   id              String    @id @default(cuid())
   actorId         String
   actor           User      @relation(fields: [actorId], references: [id])
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  staffId         String?
+  staff           StaffAdmin? @relation(fields: [staffId], references: [id])
   entityType      String
   entityId        String
   action          String
@@ -187,7 +188,7 @@ model Integration {
   provider        String            @default("woocommerce")
   storeUrl        String
   storeName       String?
-  status          IntegrationStatus @default(DISCONNECTED)
+  status          String            @default("DISCONNECTED")
   credentialHash  String?           // Encrypted credential reference
   lastSyncAt      DateTime?
   createdBy       String
@@ -199,6 +200,7 @@ model Integration {
   externalOrderMappings    ExternalOrderMapping[]
   syncJobs                 SyncJob[]
   webhookReceipts          WebhookReceipt[]
+  orders                   Order[]
 
   @@unique([provider, storeUrl])
   @@index([status])
@@ -277,8 +279,8 @@ model SyncJob {
   id              String        @id @default(cuid())
   integrationId   String
   integration     Integration   @relation(fields: [integrationId], references: [id])
-  type            SyncJobType
-  status          SyncJobStatus @default(PENDING)
+  type            String
+  status          String        @default("PENDING")
   startedAt       DateTime?
   finishedAt      DateTime?
   processedCount  Int           @default(0)
@@ -302,7 +304,7 @@ model WebhookReceipt {
   eventType        String
   externalResourceId String?
   eventKey         String
-  status           WebhookStatus   @default(RECEIVED)
+  status           String          @default("RECEIVED")
   receivedAt       DateTime        @default(now())
   processedAt      DateTime?
   errorSummary     String?
@@ -313,64 +315,4 @@ model WebhookReceipt {
   @@index([integrationId])
   @@index([status])
   @@map("webhook_receipts")
-}
-
-enum UserRole {
-  MANAGER
-  STAFF_ADMIN
-  CUSTOMER
-}
-
-enum AccountStatus {
-  PENDING
-  ACTIVE
-  SUSPENDED
-}
-
-enum AssignmentStatus {
-  SCHEDULED
-  ACTIVE
-  EXPIRED
-  TRANSFERRED
-  CANCELLED
-}
-
-enum PromiseStatus {
-  OPEN
-  IN_PROGRESS
-  FULFILLED
-  CANCELLED
-}
-
-enum RequestStatus {
-  OPEN
-  IN_PROGRESS
-  WAITING_FOR_CUSTOMER
-  RESOLVED
-}
-
-enum IntegrationStatus {
-  CONNECTED
-  DISCONNECTED
-  ERROR
-}
-
-enum SyncJobType {
-  INITIAL_IMPORT
-  INCREMENTAL_SYNC
-  CUSTOMER_SYNC
-  ORDER_SYNC
-}
-
-enum SyncJobStatus {
-  PENDING
-  RUNNING
-  COMPLETED
-  FAILED
-}
-
-enum WebhookStatus {
-  RECEIVED
-  PROCESSED
-  FAILED
 }

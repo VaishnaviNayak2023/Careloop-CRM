@@ -87,13 +87,16 @@ export class AlertService {
   async getDashboardMetrics() {
     const [
       totalCustomers,
+      totalOrders,
       overduePromises,
       dueTodayPromises,
       fulfilledThisMonth,
       openRequests,
+      pendingPromises,
       attentionItems
     ] = await Promise.all([
       prisma.customer.count(),
+      prisma.order.count(),
       promiseService.getOverduePromises().then(p => p.length),
       promiseService.getDueTodayPromises().then(p => p.length),
       prisma.promise.count({
@@ -107,13 +110,25 @@ export class AlertService {
       prisma.supportRequest.count({
         where: { status: { in: ['OPEN', 'IN_PROGRESS'] } }
       }),
+      prisma.promise.count({
+        where: { status: { in: ['OPEN', 'IN_PROGRESS'] } }
+      }),
       this.getAttentionItems()
     ]);
 
+    // Calculate total revenue from orders
+    const orders = await prisma.order.findMany({
+      where: { orderStatus: { in: ['completed', 'processing'] } }
+    });
+    const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+
     return {
       totalCustomers,
+      totalOrders,
+      totalRevenue,
       promisesDueToday: dueTodayPromises,
       overduePromises,
+      pendingPromises,
       fulfilledThisMonth,
       openSupportRequests: openRequests,
       customersNeedingAttention: attentionItems.length

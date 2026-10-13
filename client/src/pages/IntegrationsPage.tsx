@@ -30,6 +30,17 @@ export default function IntegrationsPage() {
     }
   };
 
+  const handleEnableDemoMode = async () => {
+    try {
+      await api.post('/integrations/woocommerce/demo-mode');
+      alert('Demo mode enabled! Orders have been generated.');
+      fetchIntegrationStatus();
+    } catch (error: any) {
+      console.error('Failed to enable demo mode:', error);
+      alert(error.response?.data?.error || 'Failed to enable demo mode');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -104,10 +115,15 @@ export default function IntegrationsPage() {
               <p className="text-sm text-gray-600">
                 Connect your WooCommerce store to synchronize customers and orders.
               </p>
-              <Link to="/integrations/woocommerce/connect" className="btn-primary flex items-center justify-center gap-2 w-full">
-                <Plus className="w-4 h-4" />
-                Connect Store
-              </Link>
+              <div className="flex gap-2">
+                <Link to="/integrations/woocommerce/connect" className="btn-primary flex items-center justify-center gap-2 flex-1">
+                  <Plus className="w-4 h-4" />
+                  Connect Store
+                </Link>
+                <button onClick={handleEnableDemoMode} className="btn-secondary flex items-center justify-center gap-2 flex-1">
+                  <span className="font-medium">Demo Mode</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

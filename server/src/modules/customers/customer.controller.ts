@@ -7,8 +7,17 @@ const customerService = new CustomerService();
 export class CustomerController {
   async getAllCustomers(req: Request, res: Response, next: NextFunction) {
     try {
-      const customers = await customerService.getAllCustomers();
-      res.json(customers);
+      const { search, status, page = '1', limit = '50' } = req.query;
+      
+      const options = {
+        search: search as string | undefined,
+        status: status as string | undefined,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      };
+
+      const result = await customerService.getAllCustomers(options);
+      res.json(result);
     } catch (error) {
       next(error);
     }

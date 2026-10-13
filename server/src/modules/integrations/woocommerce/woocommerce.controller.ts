@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { WooCommerceService } from './woocommerce.service';
+import { WooCommerceClient } from './woocommerce.client';
 import { connectIntegrationSchema, syncRequestSchema } from './woocommerce.schema';
 
 const wooCommerceService = new WooCommerceService();
@@ -17,6 +18,26 @@ export class WooCommerceController {
         return res.status(400).json({ error: error.errors });
       }
       next(error);
+    }
+  }
+
+  async testConnection(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { storeUrl, consumerKey, consumerSecret } = req.body;
+      
+      const client = new WooCommerceClient({
+        storeUrl,
+        consumerKey,
+        consumerSecret
+      });
+
+      const isConnected = await client.testConnection();
+      res.json({ connected: isConnected });
+    } catch (error: any) {
+      res.status(400).json({ 
+        connected: false, 
+        error: error.message || 'Connection test failed' 
+      });
     }
   }
 
@@ -57,6 +78,16 @@ export class WooCommerceController {
       const { id } = req.params;
       const integration = await wooCommerceService.disconnectIntegration(id);
       res.json(integration);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async enableDemoMode(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+      const integration = await wooCommerceService.enableDemoMode(userId);
+      res.status(201).json(integration);
     } catch (error) {
       next(error);
     }
