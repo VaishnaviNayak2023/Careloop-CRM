@@ -1,0 +1,376 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  fullName        String
+  role            UserRole  @default(CUSTOMER)
+  accountStatus   AccountStatus @default(ACTIVE)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  customerProfile Customer?
+  staffProfile    StaffAdmin?
+  activityEvents  ActivityEvent[]
+
+  @@map("users")
+}
+
+model Customer {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  name            String
+  email           String
+  phone           String?
+  company         String?
+  customerType    String    @default("individual")
+  status          String    @default("active")
+  source          String    @default("direct")
+  tags            String?   // JSON array as string
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  updatedBy       String?
+  version         Int       @default(1)
+
+  // Relations
+  currentAssignmentId String?
+  currentAssignment   Assignment?  @relation("CurrentAssignment", fields: [currentAssignmentId], references: [id])
+  assignments         Assignment[]
+  promises            Promise[]
+  interactions        Interaction[]
+  supportRequests     SupportRequest[]
+  activityEvents      ActivityEvent[]
+  externalMappings    ExternalCustomerMapping[]
+  orders              Order[]
+
+  @@map("customers")
+}
+
+model StaffAdmin {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  department      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  createdPromises     Promise[]     @relation("CreatedPromises")
+  assignedPromises    Promise[]     @relation("AssignedPromises")
+  completedPromises   Promise[]     @relation("CompletedPromises")
+  assignedCustomers   Assignment[]  @relation("AssignedCustomers")
+  createdAssignments  Assignment[]  @relation("CreatedAssignments")
+  supportRequests     SupportRequest[]
+  activityEvents      ActivityEvent[]
+
+  @@map("staff_admins")
+}
+
+model Assignment {
+  id              String        @id @default(cuid())
+  customerId      String
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  adminId         String
+  admin           StaffAdmin    @relation("AssignedCustomers", fields: [adminId], references: [id])
+  assignedBy      String
+  createdBy       StaffAdmin    @relation("CreatedAssignments", fields: [assignedBy], references: [id])
+  startAt         DateTime
+  endAt           DateTime
+  status          AssignmentStatus @default(SCHEDULED)
+  handoverNotes   String?
+  createdAt       DateTime      @default(now())
+  endedAt         DateTime?
+
+  @@unique([customerId, status])
+  @@index([customerId])
+  @@index([adminId])
+  @@map("assignments")
+}
+
+model Promise {
+  id              String        @id @default(cuid())
+  customerId      String
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  orderId         String?
+  order           Order?        @relation(fields: [orderId], references: [id])
+  title           String
+  description     String
+  dueAt           DateTime
+  status          PromiseStatus @default(OPEN)
+  priority        String        @default("medium")
+  createdBy       String
+  creator         StaffAdmin    @relation("CreatedPromises", fields: [createdBy], references: [id])
+  assignedTo      String
+  assignee        StaffAdmin    @relation("AssignedPromises", fields: [assignedTo], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  completedAt     DateTime?
+  completedBy     String?
+  completer       StaffAdmin?   @relation("CompletedPromises", fields: [completedBy], references: [id])
+  version         Int           @default(1)
+
+  @@index([customerId])
+  @@index([assignedTo])
+  @@index([dueAt])
+  @@index([orderId])
+  @@map("promises")
+}
+
+model Interaction {
+  id              String    @id @default(cuid())
+  customerId      String
+  customer        Customer  @relation(fields: [customerId], references: [id])
+  type            String    @default("note")
+  summary         String
+  details         String?
+  authorId        String?
+  authorName      String?
+  isInternal      Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([createdAt])
+  @@map("interactions")
+}
+
+model SupportRequest {
+  id              String            @id @default(cuid())
+  customerId      String
+  customer        Customer          @relation(fields: [customerId], references: [id])
+  subject         String
+  description     String
+  status          RequestStatus     @default(OPEN)
+  priority        String            @default("medium")
+  assignedTo      String?
+  assignee        StaffAdmin?       @relation(fields: [assignedTo], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  resolvedAt      DateTime?
+  customerVisible Boolean           @default(true)
+  version         Int               @default(1)
+
+  @@index([customerId])
+  @@index([assignedTo])
+  @@index([status])
+  @@map("support_requests")
+}
+
+model ActivityEvent {
+  id              String    @id @default(cuid())
+  actorId         String
+  actor           User      @relation(fields: [actorId], references: [id])
+  entityType      String
+  entityId        String
+  action          String
+  timestamp       DateTime  @default(now())
+  changes         String?   // JSON object as string
+  correlationId   String?
+
+  @@index([entityType, entityId])
+  @@index([timestamp])
+  @@map("activity_events")
+}
+
+// WooCommerce Integration Models
+model Integration {
+  id              String            @id @default(cuid())
+  provider        String            @default("woocommerce")
+  storeUrl        String
+  storeName       String?
+  status          IntegrationStatus @default(DISCONNECTED)
+  credentialHash  String?           // Encrypted credential reference
+  lastSyncAt      DateTime?
+  createdBy       String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  externalCustomerMappings ExternalCustomerMapping[]
+  externalOrderMappings    ExternalOrderMapping[]
+  syncJobs                 SyncJob[]
+  webhookReceipts          WebhookReceipt[]
+
+  @@unique([provider, storeUrl])
+  @@index([status])
+  @@map("integrations")
+}
+
+model ExternalCustomerMapping {
+  id               String  @id @default(cuid())
+  integrationId    String
+  integration      Integration @relation(fields: [integrationId], references: [id])
+  customerId       String
+  customer         Customer @relation(fields: [customerId], references: [id])
+  externalCustomerId String?
+  externalEmail     String
+  lastSyncedAt     DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([integrationId, externalCustomerId])
+  @@unique([integrationId, externalEmail])
+  @@index([integrationId])
+  @@index([customerId])
+  @@map("external_customer_mappings")
+}
+
+model ExternalOrderMapping {
+  id               String  @id @default(cuid())
+  integrationId    String
+  integration      Integration @relation(fields: [integrationId], references: [id])
+  internalOrderId  String  @unique
+  order            Order    @relation(fields: [internalOrderId], references: [id])
+  externalOrderId  String
+  externalOrderNumber String
+  lastSyncedAt     DateTime @default(now())
+  externalModifiedAt DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([integrationId, externalOrderId])
+  @@index([integrationId])
+  @@index([internalOrderId])
+  @@map("external_order_mappings")
+}
+
+model Order {
+  id              String    @id @default(cuid())
+  integrationId   String?
+  integration     Integration? @relation(fields: [integrationId], references: [id])
+  customerId      String?
+  customer        Customer?  @relation(fields: [customerId], references: [id])
+  externalOrderId String?    @unique
+  externalOrderNumber String?
+  orderStatus     String
+  currency        String    @default("USD")
+  total           Float
+  paymentMethod   String?
+  paymentStatus   String?
+  shippingAddress String?   // JSON as string
+  billingAddress  String?   // JSON as string
+  lineItems       String?   // JSON as string
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastSyncedAt    DateTime  @default(now())
+
+  // Relations
+  externalMapping  ExternalOrderMapping?
+  promises        Promise[]
+
+  @@index([integrationId])
+  @@index([customerId])
+  @@index([externalOrderId])
+  @@map("orders")
+}
+
+model SyncJob {
+  id              String        @id @default(cuid())
+  integrationId   String
+  integration     Integration   @relation(fields: [integrationId], references: [id])
+  type            SyncJobType
+  status          SyncJobStatus @default(PENDING)
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  processedCount  Int           @default(0)
+  createdCount    Int           @default(0)
+  updatedCount    Int           @default(0)
+  skippedCount    Int           @default(0)
+  failedCount     Int           @default(0)
+  errorSummary    String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([integrationId])
+  @@index([status])
+  @@map("sync_jobs")
+}
+
+model WebhookReceipt {
+  id               String          @id @default(cuid())
+  integrationId    String
+  integration      Integration    @relation(fields: [integrationId], references: [id])
+  eventType        String
+  externalResourceId String?
+  eventKey         String
+  status           WebhookStatus   @default(RECEIVED)
+  receivedAt       DateTime        @default(now())
+  processedAt      DateTime?
+  errorSummary     String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([eventKey])
+  @@index([integrationId])
+  @@index([status])
+  @@map("webhook_receipts")
+}
+
+enum UserRole {
+  MANAGER
+  STAFF_ADMIN
+  CUSTOMER
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum AssignmentStatus {
+  SCHEDULED
+  ACTIVE
+  EXPIRED
+  TRANSFERRED
+  CANCELLED
+}
+
+enum PromiseStatus {
+  OPEN
+  IN_PROGRESS
+  FULFILLED
+  CANCELLED
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_CUSTOMER
+  RESOLVED
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+enum SyncJobType {
+  INITIAL_IMPORT
+  INCREMENTAL_SYNC
+  CUSTOMER_SYNC
+  ORDER_SYNC
+}
+
+enum SyncJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum WebhookStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+}
